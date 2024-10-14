@@ -11,12 +11,14 @@ provider "google" {
     # Configuration options
     project = "example"
     region = "us-central1"
+    zone = "us-central1-c"
 }
 
 resource "google_compute_instance" "terraform" {
     name = "terraform"
-    machine_type = "n1-standard-2"
-    zone = "us-central1-c"
+    # machine_type = "n1-standard-2"
+    machine_type = "e2-micro"
+    tags = ["web", "dev"]
 
     boot_disk {
         initialize_params {
@@ -29,4 +31,5 @@ resource "google_compute_instance" "terraform" {
         access_config {
         }
     }
+    allow_stopping_for_update = true
 }

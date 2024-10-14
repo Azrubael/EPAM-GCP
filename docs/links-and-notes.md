@@ -9,3 +9,14 @@ https://cloud.google.com/compute/docs/instance-groups/creating-groups-of-managed
 
 # Autoscaling groups of instances 
 https://cloud.google.com/compute/docs/autoscaler
+
+
+TF resources include:
+- instances,
+- instance templates,
+- groups,
+- VPC networks,
+- firewall rules,
+- VPN tunnels,
+- Cloud Routers,
+- load balancers.

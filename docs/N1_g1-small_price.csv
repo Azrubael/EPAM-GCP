@@ -1,0 +1,12 @@
+service_display_name,name,quantity,region,service_id,sku,"total_price, USD",notes
+Compute Engine,"Spot Preemptible Small Instance
+With 1 VCPU running in Americas",3650,us-central1,6F81-5844-456A,CFA2-8CBE-B7E7,23.433,
+Compute Engine,Storage PD Capacity,50,us-central1,6F81-5844-456A,D973-5D65-BAB2,0.8,
+,,,,,,,
+,,,,,Total Price:,24.233,
+,,,,,,,
+"Prices are in US dollars, effective date is 2024-10-10T16:12:21.040Z",,,,,,,
+,,,,,,,
+The estimated fees provided by Google Cloud Pricing Calculator are for discussion purposes only and are not binding on either you or Google. Your actual fees may be higher or lower than the estimate.,,,,,,,
+,,,,,,,
+Url to the estimate:,https://cloud.google.com/calculator?dl=CjhDaVF4TVdWa05qZ3dZeTA0WXpZM0xUUmtPVGd0T1dOalpTMWpOMlk0WXpSbU5tWTROMk1RQVE9PRokQTU1NDE4QzktQjFFNi00Q0ZGLTk0NUUtNEVGNzAxMDJDN0RD,,,,,,

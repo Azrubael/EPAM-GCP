@@ -3,8 +3,8 @@
 **/azwenv
 **/pyenv
 
-**/.env
-**/env_local
+# **/.env
+# **/env_local
 **/terraform.tfvars
 **/__pycache__
 **/.pytest_cache

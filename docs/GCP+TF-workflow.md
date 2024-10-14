@@ -43,7 +43,7 @@ resource "google_compute_network" "vpc_network" {
     internal_ipv6_range             = null
     mtu                             = 0
     name                            = "terraform-network"
-    project                         = "az-537298"
+    project                         = "example"
     routing_mode                    = "REGIONAL"
     self_link                       = "https://www.googleapis.com/compute/v1/projects/example/global/networks/terraform-network"
 

@@ -47,6 +47,10 @@ provider "google" {}
 * provider.google version = "-> 2.12"
     ...
 
+    $ terraform validate
+# OR or if you need to validate for Google guardrails
+    $ gcloud beta terraform vet
+
 #########################################################
     $ vim mynetwork.tf
     $ cat mynetwork.tf

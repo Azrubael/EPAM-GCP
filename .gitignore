@@ -1,0 +1,12 @@
+**/.vagrant
+**/azenv
+**/azwenv
+**/pyenv
+
+**/.env
+**/env_local
+**/terraform.tfvars
+**/__pycache__
+**/.pytest_cache
+
+**/ubuntu-bionic-18.04-cloudimg-console.log

@@ -97,6 +97,10 @@ output "instance_link" {
     $ terraform init
     $ terraform fmt && terraform validate
     $ terraform plan
+# If prompted, enter the details for the instance creation as shown below:
+var.instance_name: myinstance
+var.instance_zone: my_zone
+
     $ terraform apply
 
 # If prompted, enter the details for the instance creation as shown below:
@@ -144,6 +148,16 @@ resource "google_storage_bucket" "example_bucket" {
 var.instance_name: myinstance
 var.instance_zone: my_zone
 
+    $ terraform apply
+# If prompted, enter the details for the instance creation as shown below:
+var.instance_name: myinstance
+var.instance_zone: my_zone
+
 
 ### Task 5. View Dependency Graph
     $ terraform graph | dot -Tpng > graph.png
+
+
+
+### To understand how to read this graph, please visit this page:
+https://developer.hashicorp.com/terraform/internals/graph

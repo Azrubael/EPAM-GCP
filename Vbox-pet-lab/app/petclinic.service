@@ -1,0 +1,12 @@
+[Unit]
+Description=Spring Pet Clinic Application
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/app/start_app.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

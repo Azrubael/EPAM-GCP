@@ -1,0 +1,70 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  ### ------ Define the VM for the Pet Clinic application
+  config.vm.define "pc" do |pc|
+    pc.vm.box = "ubuntu/focal64" # Ubuntu 20.04
+    pc.vm.network "private_network", type: "dhcp"
+    pc.vm.hostname = "petclinic"
+    pc.vm.synced_folder ".", "/vagrant", disabled: false
+    pc.vm.provider "virtualbox" do |ubuntu20|
+      ubuntu20.name = "petclinic"
+      ubuntu20.memory = "1200"
+      ubuntu20.cpus = 1
+      ubuntu20.customize ["modifyvm", :id, "--vram", "16"]
+    end
+
+    pc.vm.provision "file", source: "./app/spring-petclinic-*.jar", destination: "/home/vagrant/spring-petclinic-*.jar"
+    pc.vm.provision "file", source: "./app/__cacert_entrypoint.sh", destination: "/home/vagrant/__cacert_entrypoint.sh"
+    pc.vm.provision "file", source: "./app/start_app.sh", destination: "/home/vagrant/start_app.sh"
+    pc.vm.provision "file", source: "./app/petclinic.service", destination: "/home/vagrant/petclinic.service"
+
+
+    pc.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update
+      sudo apt-get install -y openjdk-17-jre
+      mkdir -p /app
+      mv /home/vagrant/spring-petclinic-*.jar /app/spring-petclinic.jar
+      mv /home/vagrant/__cacert_entrypoint.sh /app/__cacert_entrypoint.sh
+      mv /home/vagrant/start_app.sh /app/start_app.sh
+      sudo mv /home/vagrant/petclinic.service /etc/systemd/system/petclinic.service
+
+      nohup java -Djava.security.egd=file:/dev/./urandom -jar /app/spring-petclinic.jar >> /app/petclinic.log 2>&1 &
+
+      if curl -f http://localhost:8080/; then
+          echo "Petclinic is running OK."
+          exit 0
+      else
+          echo "Petclinic didn't start."
+          exit 1
+      fi
+    SHELL
+  end
+
+
+  ### ------- Define the VM for the MySQL server
+  config.vm.define "mysql" do |mysql|
+    mysql.vm.box = "ubuntu/focal64" # Ubuntu 20.04
+    mysql.vm.network "private_network", type: "dhcp"
+    mysql.vm.hostname = "mysqlserver"
+    mysql.vm.synced_folder ".", "/vagrant", disabled: false
+    mysql.vm.provider "virtualbox" do |ubuntu20|
+      ubuntu20.name = "mysqlserver"
+      ubuntu20.memory = "1200"
+      ubuntu20.cpus = 1
+      ubuntu20.customize ["modifyvm", :id, "--vram", "16"]
+    end
+
+    mysql.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update
+      sudo apt-get install -y mysql-server
+
+      sudo mysql -e "CREATE DATABASE petclinic;"
+      sudo mysql -e "CREATE USER 'petclinic'@'localhost' IDENTIFIED BY 'petclinic';"
+      sudo mysql -e "GRANT ALL PRIVILEGES ON petclinic.* TO 'petclinic'@'localhost';"
+      sudo mysql -e "FLUSH PRIVILEGES;"
+    SHELL
+  end
+end

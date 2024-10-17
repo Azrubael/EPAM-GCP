@@ -7,6 +7,8 @@ Type=simple
 ExecStart=/app/start_app.sh
 Restart=always
 RestartSec=10
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target

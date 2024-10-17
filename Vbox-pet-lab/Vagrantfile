@@ -41,7 +41,7 @@ Vagrant.configure("2") do |config|
     pc.vm.provision "file", source: "./app/start_app.sh", destination: "/home/vagrant/start_app.sh"
     pc.vm.provision "file", source: "./app/petclinic.service", destination: "/home/vagrant/petclinic.service"
 
-    mysql.vm.provision "shell", path: "scripts/petclinic-provision.sh"
+    pc.vm.provision "shell", path: "scripts/petclinic-provision.sh"
 
   end
 

@@ -8,5 +8,6 @@
 **/terraform.tfvars
 **/__pycache__
 **/.pytest_cache
+**/spring-petclinic.jar
 
 **/ubuntu-bionic-18.04-cloudimg-console.log

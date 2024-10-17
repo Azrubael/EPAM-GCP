@@ -8,4 +8,4 @@ $ git branch
   lab2-skillboost   # GCP Lab2 - Creating Resource Dependencies with Terraform 
   lab4-skillboost   # GCP Lab4 - Creating a Remote Backend
   task-mig          # The task of EPAM with a managed instances group
-  task-iac          # The task of EPAM with IaC in a Terraform environment
+  task-iac          # The task of EPAM with IaC with Terraform (petclinic)

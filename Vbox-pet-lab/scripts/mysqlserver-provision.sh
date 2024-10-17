@@ -19,6 +19,9 @@ mysql --version
 echo
 echo "### [4] -- Loading the environment..."
 source /home/vagrant/mysqlserver.env
+sudo cat /home/vagrant/mysqlserver.env >> /etc/profile.d/provision.env.sh
+sudo chmod +x /etc/profile.d/provision.env.sh
+rm /home/vagrant/mysqlserver.env
 
 
 echo

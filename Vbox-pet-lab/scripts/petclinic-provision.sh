@@ -12,6 +12,9 @@ mv /home/vagrant/petclinic.env /app/petclinic.env
 sudo mv /home/vagrant/petclinic.service /etc/systemd/system/petclinic.service
 
 source /app/petclinic.env
+sudo cat /app/petclinic.env >> /etc/profile.d/provision.env.sh
+sudo chmod +x /etc/profile.d/provision.env.sh
+rm /app/petclinic.env
 
 sudo systemctl daemon-reload
 sudo systemctl enable petclinic.service

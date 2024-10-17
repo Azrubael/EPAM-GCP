@@ -17,7 +17,8 @@ Vagrant.configure("2") do |config|
       ubuntu20.customize ["modifyvm", :id, "--vram", "16"]
     end
 
-    mysql.vm.provision "shell", path: "scripts/mysqlserver-provision.sh"
+    mysql.vm.provision "file", source: "./scripts/mysqlserver.env", destination: "/home/vagrant/mysqlserver.env"
+    mysql.vm.provision "shell", path: "./scripts/mysqlserver-provision.sh"
 
   end
 
@@ -36,12 +37,24 @@ Vagrant.configure("2") do |config|
       ubuntu20.customize ["modifyvm", :id, "--vram", "16"]
     end
 
-    pc.vm.provision "file", source: "./app/spring-petclinic.jar", destination: "/home/vagrant/spring-petclinic.jar"
-    pc.vm.provision "file", source: "./app/__cacert_entrypoint.sh", destination: "/home/vagrant/__cacert_entrypoint.sh"
-    pc.vm.provision "file", source: "./app/start_app.sh", destination: "/home/vagrant/start_app.sh"
-    pc.vm.provision "file", source: "./app/petclinic.service", destination: "/home/vagrant/petclinic.service"
+    files_to_provision = [
+      { source: "./app/spring-petclinic.jar",
+        destination: "/home/vagrant/spring-petclinic.jar" },
+      { source: "./app/__cacert_entrypoint.sh",
+        destination: "/home/vagrant/__cacert_entrypoint.sh" },
+      { source: "./app/start_app.sh",
+        destination: "/home/vagrant/start_app.sh" },
+      { source: "./app/petclinic.service",
+        destination: "/home/vagrant/petclinic.service" },
+      { source: "./scripts/petclinic.env",
+        destination: "/home/vagrant/petclinic.env" }
+    ]
 
-    pc.vm.provision "shell", path: "scripts/petclinic-provision.sh"
+    files_to_provision.each do |file|
+      pc.vm.provision "file", source: file[:source], destination: file[:destination]
+    end
+
+    pc.vm.provision "shell", path: "./scripts/petclinic-provision.sh"
 
   end
 

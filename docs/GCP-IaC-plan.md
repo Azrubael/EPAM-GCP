@@ -99,9 +99,19 @@ mysql-server:
 
 
 
-### Скрипт для активации и запуска службы 
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable petclinic.service
-sudo systemctl start petclinic.service
-```
+### 2024-10-18  11:20
+---------------------
+
+##### Команды, использованные при отладке:
+vagrant@petclinic:~$ sudo journalctl -u petclinic.service -f
+
+vagrant@petclinic:~$ echo $JAVA_HOME
+vagrant@petclinic:~$ readlink -f $(which java)
+/usr/lib/jvm/java-17-openjdk-amd64/bin/java
+
+vagrant@petclinic:~$ java -XshowSettings:properties -version
+#### максимально подробная информация
+...
+
+vagrant@petclinic:~$ update-alternatives --config java
+

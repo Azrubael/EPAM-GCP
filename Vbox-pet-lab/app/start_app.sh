@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Run the application
-java -Djava.security.egd=file:/dev/./urandom -jar /spring-petclinic.jar
+java -Djava.security.egd=file:/dev/./urandom -jar /app/spring-petclinic.jar
 
 # Check the app state
 CURRENTTIME=$(date +"%Y-%m-%d %H:%M:%S")

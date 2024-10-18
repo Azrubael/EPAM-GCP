@@ -102,7 +102,7 @@ mysql-server:
 ### 2024-10-18  11:20
 ---------------------
 
-##### Команды, использованные при отладке:
+##### Команды, использованные при отладке по п.4.b:
 vagrant@petclinic:~$ sudo journalctl -u petclinic.service -f
 
 vagrant@petclinic:~$ echo $JAVA_HOME

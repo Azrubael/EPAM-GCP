@@ -1,6 +1,7 @@
 #!/bin/bash
 
-set -e  # Stop the script if an error happened
+set -e
+sudo timedatectl set-timezone Europe/Kyiv
 
 sudo apt-get update
 

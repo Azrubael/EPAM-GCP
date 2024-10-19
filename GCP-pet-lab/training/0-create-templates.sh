@@ -67,11 +67,8 @@ total_duration=900
 echo "### [5] Wait for $total_duration seconds. Press [q] to interrupt."
 interval=10
 elapsed=0
-
 source ./modules/waiting.sh
-
 waiting $total_duration $interval $elapsed
-echo
 
 
 echo

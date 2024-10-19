@@ -6,11 +6,18 @@ sudo timedatectl set-timezone Europe/Kyiv
 sudo apt-get update
 sudo apt-get install -y openjdk-17-jre
 mkdir -p /app
-mv /home/vagrant/spring-petclinic.jar /app/spring-petclinic.jar
-mv /home/vagrant/__cacert_entrypoint.sh /app/__cacert_entrypoint.sh
-mv /home/vagrant/start_app.sh /app/start_app.sh
-mv /home/vagrant/petclinic.env /app/petclinic.env
-sudo mv /home/vagrant/petclinic.service /etc/systemd/system/petclinic.service
+
+# Get the bucket name from metadata
+BUCKET_NAME=$(curl -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/attributes/gs_bucket)
+
+# Download files from the specified Google Cloud Storage bucket
+gsutil -m cp -r gs://$BUCKET_NAME/app/spring-petclinic.jar /app/spring-petclinic.jar
+gsutil -m cp -r gs://$BUCKET_NAME/app/__cacert_entrypoint.sh /app/__cacert_entrypoint.sh
+gsutil -m cp -r gs://$BUCKET_NAME/app/start_app.sh /app/start_app.sh
+gsutil -m cp -r gs://$BUCKET_NAME/app/petclinic.service /app/petclinic.service
+gsutil -m cp -r gs://$BUCKET_NAME/.env/petclinic.env /app/petclinic.env
+
+sudo mv /app/petclinic.service /etc/systemd/system/petclinic.service
 
 source /app/petclinic.env
 sudo cat /app/petclinic.env >> /etc/profile.d/provision.env.sh

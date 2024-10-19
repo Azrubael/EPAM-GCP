@@ -19,10 +19,12 @@ mysql --version
 
 echo
 echo "### [4] -- Loading the environment..."
-source /home/vagrant/mysqlserver.env
-sudo cat /home/vagrant/mysqlserver.env >> /etc/profile.d/provision.env.sh
+sudo mkdir -p /home/debian/.env
+BUCKET_NAME=$(curl -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/attributes/gs_bucket)
+gsutil -m cp -r gs://$BUCKET_NAME/.env/mysqlserver.env /home/debian/.env/mysqlserver.env
+source /home/debian/.env/mysqlserver.env
+sudo cat /home/debian/.env/mysqlserver.env >> /etc/profile.d/provision.env.sh
 sudo chmod +x /etc/profile.d/provision.env.sh
-rm /home/vagrant/mysqlserver.env
 
 
 echo
@@ -33,12 +35,6 @@ sudo systemctl enable mysql
 
 echo
 echo "### [6] -- Run SQL commands to create a user and a database"
-# MYSQL_ROOT_PASSWORD=""
-# MYSQL_ALLOW_EMPTY_PASSWORD=true
-# MYSQL_USER="petclinic"
-# MYSQL_PASSWORD="petclinic"
-# MYSQL_DATABASE="information_schema"
-
 sudo mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<EOF
 CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;
 CREATE USER IF NOT EXISTS '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';

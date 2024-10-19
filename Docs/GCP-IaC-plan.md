@@ -115,3 +115,16 @@ vagrant@petclinic:~$ java -XshowSettings:properties -version
 
 vagrant@petclinic:~$ update-alternatives --config java
 
+
+
+### 2024-10-19  11:57
+---------------------
+
+Сегодня занимаюсь разработкой скриптов Баш для создания шаблонов,из которых будут запускаться экземпляры виртуальных машин в управляемых группах.
+Порядок работы:
+~~ Следует отредактировать mysqlserver-provision.sh и petclinic-provision.sh таким образом, чтобы они загружали файлы из Cloud Storage;~~
++ доработка '1-create-templates.sh' таким образом, чтобы:
+    ~~ mysqlserver-provision.sh и petclinic-provision.sh загружались сразу Cloud Storage и потом брались оттуда;~~
+    - запускались ВМ petclinic-server и mysql-server;
+    - запуск ВМ petclinic-server и mysql-server производится отдельным модулем;
++ тестирование скрипта в облачной среде. Контролировать появление шаблонов.

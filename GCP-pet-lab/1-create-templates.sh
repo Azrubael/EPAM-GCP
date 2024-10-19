@@ -85,6 +85,7 @@ gcloud compute instances create $PC_SRV \
     --shielded-integrity-monitoring \
     --labels=instance="$PC_SRV-instance" \
     --reservation-affinity=any \
+    --metadata gs_bucket="$MY_BUCKET" \
     --metadata-from-file=startup-script=scripts/petclinic-provision.sh
 
 
@@ -107,6 +108,7 @@ gcloud compute instances create $SQL_SRV \
     --shielded-integrity-monitoring \
     --labels=instance="$SQL_SRV-instance" \
     --reservation-affinity=any \
+    --metadata gs_bucket="$MY_BUCKET" \
     --metadata-from-file=startup-script=scripts/mysqlserver-provision.sh
 
 
@@ -122,7 +124,7 @@ waiting $total_duration $interval $elapsed
 echo
 echo """### Step 8 -- Cleanup. Remove the created
 $MY_BUCKET, $MY_VPCL, and subnets $PC_SUBNET and $SQL_SUBNET"""
-{
+if {
     gsutil -m rm -r gs://$MY_BUCKET/
     gcloud compute firewall-rules delete allow-petclinic-from-internet --quiet
     gcloud compute firewall-rules delete allow-mysql-from-petclinic --quiet
@@ -131,9 +133,7 @@ $MY_BUCKET, $MY_VPCL, and subnets $PC_SUBNET and $SQL_SUBNET"""
     gcloud compute networks subnets delete "$SQL_SUBNET" \
         --region $GCP_REGION --quiet
     gcloud compute networks delete $MY_VPC --quiet
-}
-
-if [ $? -eq 0 ]; then
+    }; then
     echo "Script execution completed and resources cleaned up."
 else
     echo "Something didn't removed."

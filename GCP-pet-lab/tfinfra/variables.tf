@@ -20,6 +20,7 @@ variable MY_VPC {
 variable MY_FILES {
   type = list(string)
   default = [
+    "app/spring-petclinic.jar",
     "app/__cacert_entrypoint.sh",
     "app/start_app.sh",
     "app/petclinic.service",
@@ -27,10 +28,6 @@ variable MY_FILES {
     ".env/petclinic.env",
     ".env/mysqlserver.env",
   ]
-}
-variable MY_ARTIFACT {
-  type = string
-  default = "app/spring-petclinic.jar"
 }
 variable VM_TYPE {
   type = string

@@ -6,18 +6,11 @@ resource "google_storage_bucket" "bucket" {
 }
 
 ### Upload text files to Cloud Storage
-resource "google_storage_bucket_object" "textfiles" {
-  count  = length(var.MY_FILES)
-  bucket = google_storage_bucket.bucket.name
-  name   = var.MY_FILES[count.index]
-  source = file("../${var.MY_FILES[count.index]}")
-}
-
-### Upload binary artifact file to Cloud Storage
-resource "google_storage_bucket_object" "afticact" {
-  bucket = google_storage_bucket.bucket.name
-  name   = basename(var.MY_ARTIFACT)
-  source = var.MY_ARTIFACT
+resource "google_storage_bucket_object" "files" {
+  for_each = toset(var.MY_FILES)
+  name     = each.value
+  source   = "../${each.value}"
+  bucket   = google_storage_bucket.bucket.name
 }
 
 ### Create a VPC

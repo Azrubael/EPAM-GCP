@@ -128,3 +128,61 @@ vagrant@petclinic:~$ update-alternatives --config java
     - запускались ВМ petclinic-server и mysql-server;
     - запуск ВМ petclinic-server и mysql-server производится отдельным модулем;
 + тестирование скрипта в облачной среде. Контролировать появление шаблонов.
+
+
+
+
+### 2024-10-20  11:15
+---------------------
+
+Доработка, тестирование и оформление скрипта `6-create-templates.sh`
+
+**Образцы кода для создания шаблонов, полученные вручную через Google Cloud Console**
+----------------
+
+```bash
+##### petclinic-template
+gcloud beta compute instance-templates create petclinic-template \
+    --project=az-537298 \
+    --machine-type=g1-small \
+    --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=pc-subnet \
+    --instance-template-region=us-central1 \
+    --maintenance-policy=MIGRATE \
+    --provisioning-model=STANDARD \
+    --service-account="$GCP_SERVICE_ACCOUNT" \
+    --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/trace.append \
+    --region=us-central1 \
+    --tags=petclinic-vpc,petclinic-server,petclinic-firewall,pc-subnet,lb-health-check \
+    --create-disk=auto-delete=yes,boot=yes,device-name=petclinic-template,image=projects/az-537298/global/images/petclinic-image,mode=rw,size=10,type=pd-balanced \
+    --no-shielded-secure-boot \
+    --shielded-vtpm \
+    --shielded-integrity-monitoring \
+    --reservation-affinity=any
+
+##### mysqlserver-template
+gcloud beta compute instance-templates create petclinic-template \
+    --project=az-537298 \
+    --machine-type=g1-small \
+    --network-interface=stack-type=IPV4_ONLY,subnet=mysql-subnet,no-address \
+    --instance-template-region=us-central1 \
+    --maintenance-policy=MIGRATE \
+    --provisioning-model=STANDARD \
+    --service-account="$GCP_SERVICE_ACCOUNT" \
+    --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/trace.append \
+    --region=us-central1 \
+    --tags=mysql-subnet,petclinic-vpc,mysqlserver-firewall,mysql-server,lb-health-check \
+    --create-disk=auto-delete=yes,boot=yes,device-name=petclinic-template,image=projects/az-537298/global/images/mysqlserver-image,mode=rw,size=10,type=pd-balanced \
+    --no-shielded-secure-boot \
+    --shielded-vtpm \
+    --shielded-integrity-monitoring \
+    --reservation-affinity=any
+
+###### filtering Google Cloud disks by project and by zone:
+gcloud compute disks list --project="$GCP_PROJECT_ID" --filter="$GCP_PROJECT_ID"
+```
+
+
+### 2024-10-20  17:09
+---------------------
+
+Разработка `/tfinfra`.

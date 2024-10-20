@@ -14,10 +14,14 @@ MY_FILES=(  "app/spring-petclinic.jar"
 PC_SUBNET="pc-subnet"
 PC_FIREWALL="petclinic-firewall"
 PC_SRV="petclinic-server"
+PC_IMAGE="petclinic-image"
+PC_TEMPLATE="petclinic-template"
 
 SQL_SUBNET="mysql-subnet"
 SQL_FIREWALL="mysqlserver-firewall"
 SQL_SRV="mysql-server"
+SQL_IMAGE="mysqlserver-image"
+SQL_TEMPLATE="mysqlserver-template"
 
 
 echo
@@ -53,7 +57,7 @@ gcloud compute firewall-rules create allow-petclinic-from-internet \
     --action=ALLOW \
     --network="$MY_VPC" \
     --rules=tcp:8080 \
-    --priority=1000 \
+    --priority=999 \
     --source-ranges=0.0.0.0/0 \
     --target-tags="$PC_FIREWALL" \
     --description="Allow HTTP traffic to petclinic"
@@ -64,7 +68,7 @@ gcloud compute firewall-rules create allow-mysql-from-petclinic \
     --action=ALLOW \
     --network="$MY_VPC" \
     --rules=tcp:3306 \
-    --priority=1000 \
+    --priority=999 \
     --source-ranges=10.0.1.0/24 \
     --target-tags="$SQL_FIREWALL" \
     --description="Allow MySQL traffic from petclinic to mysqlserver"
@@ -75,7 +79,7 @@ gcloud compute firewall-rules create allow-ssh-from-internet \
     --action=ALLOW \
     --network="$MY_VPC" \
     --rules=tcp:22,icmp \
-    --priority=999 \
+    --priority=997 \
     --source-ranges=0.0.0.0/0 \
     --target-tags="$PC_FIREWALL","$SQL_FIREWALL" \
     --description="Allow SSH traffic from internet."
@@ -126,17 +130,17 @@ gcloud compute instances create $SQL_SRV \
 
 
 echo
-total_duration=900
-echo "### Step 7 -- Wait for $total_duration seconds. Press [q] to interrupt."
-interval=10
-elapsed=0
+delay7=900
+echo """### Step 7 -- Wait for $delay7 seconds. Press [q] to interrupt
+the waiting process and move further according the script."""
+interval7=10
+elapsed7=0
 source ./modules/waiting.sh
-waiting $total_duration $interval $elapsed
+waiting $delay7 $interval7 $elapsed7
 
 
 echo
-echo """### Step 8 -- Removing the servers $PC_SRV, $SQL_SRV,
-the bucket $MY_BUCKET, the VPC $MY_VPC with subnets $PC_SUBNET and $SQL_SUBNET"""
+echo "### Step 8 -- Removing the $PC_SRV and $SQL_SRV instances"
 if {
     gcloud compute instances delete $PC_SRV \
         --project="$GCP_PROJECT_ID" \
@@ -148,6 +152,97 @@ if {
         --zone="$GCP_ZONE" \
         --quiet \
         --keep-disks=boot
+    }; then
+    echo "The servers $PC_SRV and $SQL_SRV removed."
+else
+    echo """
+The servers $PC_SRV and $SQL_SRV didn't removed.
+Something went wrong..."""
+fi
+
+
+echo
+echo "### Step 9 -- Listing available disks:"
+gcloud compute disks list --project="$GCP_PROJECT_ID"
+
+
+echo
+echo "### Step 10 -- Creating images $PC_IMAGE and $SQL_IMAGE:"
+gcloud compute images create "$PC_IMAGE" \
+    --project="$GCP_PROJECT_ID" \
+    --storage-location=us \
+    --source-disk="$PC_SRV" \
+    --source-disk-zone="$GCP_ZONE" \
+    --labels=app=petclinic \
+    --description=GCP-pet-lab
+
+gcloud compute images create "$SQL_IMAGE" \
+    --project="$GCP_PROJECT_ID" \
+    --storage-location=us \
+    --source-disk="$SQL_SRV" \
+    --source-disk-zone="$GCP_ZONE" \
+    --labels=app=petclinic \
+    --description=GCP-pet-lab 
+
+echo    
+echo "### Step 11 -- Listing images:"
+gcloud compute disks list --project="$GCP_PROJECT_ID" --filter="$GCP_PROJECT_ID"
+
+
+echo
+echo "### Step 12 -- Creating templates $PC_TEMPLATE and $SQL_TEMPLATE:"
+gcloud beta compute instance-templates create "$PC_TEMPLATE" \
+    --project="$GCP_PROJECT_ID" \
+    --machine-type=g1-small \
+    --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet="$PC_SUBNET" \
+    --instance-template-region="$GCP_REGION" \
+    --maintenance-policy=MIGRATE \
+    --provisioning-model=STANDARD \
+    --service-account="$GCP_SERVICE_ACCOUNT" \
+    --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/trace.append \
+    --region="$GCP_REGION" \
+    --tags=http-server,"$PC_FIREWALL","$PC_SRV",lb-health-check \
+    --create-disk=auto-delete=yes,boot=yes,device-name="${PC_SRV}-disk",image=projects/"$GCP_PROJECT_ID"/global/images/"$PC_IMAGE",mode=rw,size=10,type=pd-balanced \
+    --no-shielded-secure-boot \
+    --shielded-vtpm \
+    --shielded-integrity-monitoring \
+    --reservation-affinity=any
+
+gcloud beta compute instance-templates create "$SQL_TEMPLATE" \
+    --project="$GCP_PROJECT_ID" \
+    --machine-type=g1-small \
+    --network-interface=stack-type=IPV4_ONLY,subnet="$SQL_SUBNET",no-address \
+    --instance-template-region="$GCP_REGION" \
+    --maintenance-policy=MIGRATE \
+    --provisioning-model=STANDARD \
+    --service-account="$GCP_SERVICE_ACCOUNT" \
+    --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/trace.append \
+    --region="$GCP_REGION" \
+    --tags=db-server,"$SQL_FIREWALL","$SQL_SRV",lb-health-check \
+    --create-disk=auto-delete=yes,boot=yes,device-name="${SQL_SRV}-disk",image=projects/"$GCP_PROJECT_ID"/global/images/"$SQL_IMAGE",mode=rw,size=10,type=pd-balanced \
+    --no-shielded-secure-boot \
+    --shielded-vtpm \
+    --shielded-integrity-monitoring \
+    --reservation-affinity=any
+
+
+echo    
+echo "### Step 13 -- Listing available instance templates:"
+gcloud compute instance-templates list --project="$GCP_PROJECT_ID"
+
+
+echo
+delay14=900
+echo """### Step 14 -- Wait for $delay14 seconds. Press [q] to interrupt
+and remove the bucket gs://$MY_BUCKET/ and network $MY_VPC."""
+interval14=10
+elapsed14=0
+waiting $delay14 $interval14 $elapsed14
+
+
+echo
+echo "### Step 15 -- Cleaning up the infrastructure:"
+if {
     gsutil -m rm -r gs://$MY_BUCKET/
     gcloud compute firewall-rules delete allow-petclinic-from-internet --quiet
     gcloud compute firewall-rules delete allow-mysql-from-petclinic --quiet
@@ -162,32 +257,3 @@ if {
 else
     echo "Something didn't removed."
 fi
-
-
-echo
-echo "### Step 9 -- Listing available disks:"
-gcloud compute disks list --project="$GCP_PROJECT_ID"
-
-
-echo
-echo "### Step 10 -- Creating images:"
-gcloud compute images create petclinic-image \
-    --project="$GCP_PROJECT_ID" \
-    --storage-location=us \
-    --source-disk="$PC_SRV" \
-    --source-disk-zone="$GCP_ZONE" \
-    --labels=app=petclinic \
-    --description=GCP-pet-lab
-
-gcloud compute images create mysqlserver-image \
-    --project="$GCP_PROJECT_ID" \
-    --storage-location=us \
-    --source-disk="$SQL_SRV" \
-    --source-disk-zone="$GCP_ZONE" \
-    --labels=app=petclinic \
-    --description=GCP-pet-lab 
-    
-
-echo
-echo "### Step 12 -- Listing available images:"
-gcloud compute images list --project="$GCP_PROJECT_ID"

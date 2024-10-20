@@ -5,12 +5,19 @@ resource "google_storage_bucket" "bucket" {
   storage_class = "STANDARD"
 }
 
-### Upload files to Cloud Storage
-resource "google_storage_bucket_object" "files" {
+### Upload text files to Cloud Storage
+resource "google_storage_bucket_object" "textfiles" {
   count  = length(var.MY_FILES)
   bucket = google_storage_bucket.bucket.name
   name   = var.MY_FILES[count.index]
   source = file("../${var.MY_FILES[count.index]}")
+}
+
+### Upload binary artifact file to Cloud Storage
+resource "google_storage_bucket_object" "afticact" {
+  bucket = google_storage_bucket.bucket.name
+  name   = basename(var.MY_ARTIFACT)
+  source = var.MY_ARTIFACT
 }
 
 ### Create a VPC

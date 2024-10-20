@@ -14,7 +14,7 @@ Vagrant.configure("2") do |config|
     tfbuntu.vm.synced_folder ".", "/vagrant", disabled: false
     tfbuntu.vm.provider "virtualbox" do |ubuntu20|
       ubuntu20.name = "tfbuntu"
-      ubuntu20.memory = "1600"
+      ubuntu20.memory = "2000"
       ubuntu20.cpus = 2
       ubuntu20.customize ["modifyvm", :id, "--vram", "16"]
     end

@@ -9,3 +9,11 @@ Therefore, to deploy the project to Google, the script `6-create-templates.sh` a
 The `6-create-templates.sh` script does the preparatory work, it creates disk images and templates for servers.
 
 Then the infrastructure is deployed using terraform.
+```bash
+cd tfinfra
+terraform init
+terraform fmt
+terraform validate
+terraform apply -auto-approve -input=false
+terraform destroy -auto-approve -input=false
+```

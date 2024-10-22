@@ -23,19 +23,6 @@ variable MY_VPC {
   type = string
   default = "petclinic-vpc"
 }
-variable MY_FILES {
-  description = "My files to provision petclinic servers"
-  type = list(string)
-  default = [
-    "app/spring-petclinic.jar",
-    "app/__cacert_entrypoint.sh",
-    "app/start_app.sh",
-    "app/petclinic.service",
-    ".env/env_local",
-    ".env/petclinic.env",
-    ".env/mysqlserver.env",
-  ]
-}
 variable VM_TYPE {
   description = "Virtual machine type for petclinic servers"
   type = string
@@ -86,8 +73,23 @@ variable SQL_IMAGE {
   type = string
   default = "mysqlserver-image"
 }
-variable SQL_TEMPLATE_LINK {
+variable SQL_IMAGE_LINK {
   description = "MySQL server GCP template link"
   type = string
-  default = "projects/az-537298/regions/us-central1/instanceTemplates/mysqlserver-template"
+  default = "projects/az-537298/global/images/mysqlserver-image"
+}
+variable PC_MIG {
+  description = "Petclinic managed instance group name"
+  type = string
+  default = "pc-mig"
+}
+variable MIN_SIZE {
+  description = "Minimum number of petclinic servers"
+  type = number
+  default = 2
+}
+variable MAX_SIZE {
+  description = "Maximum number of petclinic servers"
+  type = number
+  default = 4
 }

@@ -18,7 +18,9 @@ cd tfinfra
 terraform init -backend-config=terreform.tfvars
 terraform fmt
 terraform validate
+terraform plan
 terraform apply -auto-approve -input=false
+terraform state list
 terraform show
 terraform destroy -auto-approve -input=false
 ```

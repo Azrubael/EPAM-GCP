@@ -7,6 +7,7 @@ terraform {
   }
 }
 
+
 ### Configure the Google Cloud Provider
 provider "google" {
   credentials = file(var.GCP_KEY_FILE)

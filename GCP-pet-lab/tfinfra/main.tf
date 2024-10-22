@@ -1,18 +1,3 @@
-### Create a Cloud Storage bucket
-resource "google_storage_bucket" "bucket" {
-  name          = "${var.GCP_PROJECT_ID}-bucket"
-  location      = var.GCP_REGION
-  storage_class = "STANDARD"
-}
-
-### Upload text files to Cloud Storage
-resource "google_storage_bucket_object" "files" {
-  for_each = toset(var.MY_FILES)
-  name     = each.value
-  source   = "../${each.value}"
-  bucket   = google_storage_bucket.bucket.name
-}
-
 ### Create a VPC
 resource "google_compute_network" "vpc" {
   name                    = "petclinic-vpc"
@@ -34,46 +19,36 @@ resource "google_compute_subnetwork" "sql_subnet" {
   region        = var.GCP_REGION
 }
 
-### Create firewall rules
-resource "google_compute_firewall" "allow_petclinic_from_internet" {
-  name    = "allow-petclinic-from-internet"
-  network = google_compute_network.vpc.self_link
-
-  allow {
-    protocol = "tcp"
-    ports    = ["8080"]
-  }
-
-  source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["petclinic-firewall"]
+### Import firewall rules module
+module "firewall" {
+  source = "./firewall"
+  vpc_network = google_compute_network.vpc.self_link
+  region = var.GCP_REGION
 }
 
-resource "google_compute_firewall" "allow_mysql_from_petclinic" {
-  name    = "allow-mysql-from-petclinic"
-  network = google_compute_network.vpc.self_link
-
-  allow {
-    protocol = "tcp"
-    ports    = ["3306"]
+/*
+### Create a managed instances group
+resource "google_compute_instance_group_manager" "group_manager" {
+  name               = "pc-group-manager"
+  base_instance_name = var.PC_SRV
+  zone               = var.GCP_ZONE
+  target_size        = 2
+  version {
+    instance_template = google_compute_instance_template.pc_template.self_link
   }
-
-  source_ranges = ["10.0.1.0/24"]
-  target_tags   = ["mysqlserver-firewall"]
+  named_port {
+    name = "http"
+    port = 8080
+  }
 }
-
-resource "google_compute_firewall" "allow_ssh_from_internet" {
-  name    = "allow-ssh-from-internet"
-  network = google_compute_network.vpc.self_link
-
-  allow {
-    protocol = "tcp"
-    ports    = ["22"]
-  }
-
-  allow {
-    protocol = "icmp"
-  }
-
-  source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["petclinic-firewall", "mysqlserver-firewall"]
+variable GCP_AUTOSCALE_ZONES {
+  description = "value of GCP_AUTOSCALE_ZONES"
+  type = list(string)
+  default = [
+    "${var.GCP_REGION}-a",
+    "${var.GCP_REGION}-b",
+    "${var.GCP_REGION}-c",
+    "${var.GCP_REGION}-f"
+  ]
 }
+*/

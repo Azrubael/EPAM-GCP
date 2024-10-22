@@ -213,7 +213,7 @@ waiting $delay14 $interval14 $elapsed14
 echo
 echo "### Step 15 -- Cleaning up the infrastructure:"
 if {
-    gsutil -m rm -r gs://$MY_BUCKET/
+    #gsutil -m rm -r gs://$MY_BUCKET/  ### UNCOMMET TO DELETE THE BUCKET!
     gcloud compute firewall-rules delete allow-petclinic-from-internet --quiet
     gcloud compute firewall-rules delete allow-mysql-from-petclinic --quiet
     gcloud compute firewall-rules delete allow-ssh-from-internet --quiet

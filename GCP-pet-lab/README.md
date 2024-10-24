@@ -22,5 +22,6 @@ terraform plan
 terraform apply -auto-approve -input=false
 terraform state list
 terraform show
+terraform graph | dot -Tpng -o graph.png
 terraform destroy -auto-approve -input=false
 ```

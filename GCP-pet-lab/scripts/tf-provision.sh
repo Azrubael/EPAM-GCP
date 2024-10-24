@@ -17,7 +17,8 @@ ssh-keygen -N "" -f /home/vagrant/.ssh/id_rsa
 echo
 echo "### [01] Installing the necessary packages for adding a new repository over HTTPS"
 sudo apt-get update
-sudo apt-get install mc apt-transport-https ca-certificates gnupg -y
+sudo apt-get install mc graphviz -y
+sudo apt-get install apt-transport-https ca-certificates gnupg -y
 
 
 echo

@@ -1,8 +1,8 @@
 /*
-* The training configuration on GCP to study the order
-* of creating a simple infrastructure that includes:
-* VPC, subnets, firewall, NAT, Auto Scaler, Managed Group etc.
-*/
+ * The training configuration on GCP to study the order
+ * of creating a simple infrastructure that includes:
+ * VPC, subnets, firewall, NAT, Auto Scaler, Managed Group etc.
+ */
 
 
 ### Create a VPC
@@ -45,23 +45,11 @@ resource "google_compute_subnetwork" "sql_subnet" {
 ### Import firewall rules module
 module "firewall" {
   source        = "./firewall"
-  vpc_network   = google_compute_network.vpc.self_link
-  region        = var.GCP_REGION
-}
-
-
-### Import database module
-module "database" {
-  source                = "./database"
-  gcp_service_account   = var.GCP_SERVICE_ACCOUNT
-  vm_type               = var.VM_TYPE
-  gcp_project_id        = var.GCP_PROJECT_ID
-  gcp_zone              = var.GCP_ZONE
-  sql_srv               = var.SQL_SRV
-  sql_template_link     = var.SQL_IMAGE_LINK
-  sql_subnet            = google_compute_subnetwork.sql_subnet.self_link
-  sql_firewall          = var.SQL_FIREWALL
-}
+  firewall_vpc  = google_compute_network.vpc.self_link
+  pc_port          = "$var.PC_PORT"
+  sql_port         = "$var.SQL_PORT"
+  ssh_port         = "$var.SSH_PORT"
+  }
 
 
 ### Backend Health Check
@@ -74,7 +62,7 @@ resource "google_compute_region_health_check" "petclinic_health_check" {
   unhealthy_threshold   = 2
 
   http_health_check {
-    port                = 8080
+    port                = var.PC_PORT
     proxy_header        = "NONE"
     request_path        = "/"
   }
@@ -133,30 +121,6 @@ resource "google_compute_region_backend_service" "petclinic_backend" {
   depends_on = [google_compute_subnetwork.pc_subnet]
 }
 
-resource "google_compute_router" "pc_router" {
-  name    = "petclinic-router"
-  region  = google_compute_subnetwork.pc_subnet.region
-  network = google_compute_network.vpc.id
-}
-
-
-resource "google_compute_router_nat" "pc_nat_gateway" {
-  name                               = "pc-nat-gateway"
-  router                             = google_compute_router.pc_router.name
-  region                             = google_compute_router.pc_router.region
-  nat_ip_allocate_option             = "AUTO_ONLY"
-  source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
-  subnetwork {
-    name                    = google_compute_subnetwork.pc_subnet.id
-    source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
-  }
-  log_config {
-    filter = "ERRORS_ONLY"
-    enable = false
-  }
-  depends_on = [google_compute_subnetwork.pc_subnet]
-}
-
 
 # Regional Instance Group Manager API
 # https://registry.terraform.io/providers/hashicorp/google/6.5.0/docs/resources/compute_region_instance_group_manager
@@ -178,7 +142,7 @@ resource "google_compute_region_instance_group_manager" "pc_mig" {
   }
   named_port {
     name = "http"
-    port = 8080
+    port = var.PC_PORT
   }
   auto_healing_policies {
     health_check      = google_compute_region_health_check.petclinic_health_check.self_link
@@ -192,25 +156,53 @@ resource "google_compute_region_instance_group_manager" "pc_mig" {
   depends_on = [google_compute_subnetwork.pc_subnet]
 }
 
-# Region Autoscaler Basic
-# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_autoscaler
-resource "google_compute_region_autoscaler" "pc_mig_autoscaler" {
-  name   = "${var.PC_MIG}-autoscaler"
-  region = var.GCP_REGION
-  target = google_compute_region_instance_group_manager.pc_mig.self_link
-  autoscaling_policy {
-    mode            = "ON"
-    min_replicas    = var.MIN_SIZE
-    max_replicas    = var.MAX_SIZE
-    cooldown_period = 60
-    cpu_utilization {
-      target = 0.6
-    }
-  }
-  depends_on = [ 
-      google_compute_subnetwork.pc_subnet,
-      google_compute_region_health_check.petclinic_health_check,
-      google_compute_region_instance_group_manager.pc_mig
-      ]
+
+module "nat" {
+  gcp_project_id              = var.GCP_PROJECT_ID
+  source                      = "./nat"
+  router_name                 = "petclinic-router"
+  router_region               = google_compute_subnetwork.pc_subnet.region
+  router_vpc                  = google_compute_network.vpc.id
+
+  nat_name                    = "pc-nat-gateway"
+  nat_ip_option               = "AUTO_ONLY"
+  ip_ranges_to_nat            = "LIST_OF_SUBNETWORKS"
+  subnet_name                 = google_compute_subnetwork.pc_subnet.id
+  ip_ranges_to_nat_subnetwork = ["ALL_IP_RANGES"]
+  log_filter                  = "ERRORS_ONLY"
+  log_enable                  = false
+
+  depends_on                  = [google_compute_subnetwork.pc_subnet]
 }
 
+
+module "autoscaler" {
+  source                 = "./autoscaler"
+  autoscaler_name        = "${var.PC_MIG}-autoscaler"
+  autoscaler_region             = var.GCP_REGION
+  autoscaler_target      = google_compute_region_instance_group_manager.pc_mig.self_link
+  autoscaler_policy_mode = "ON"
+  autoscaler_min_size    = var.MIN_SIZE
+  autoscaler_max_size    = var.MAX_SIZE
+  autoscaler_cooldown    = 60
+  autoscaler_cpu_target  = 0.6
+  depends_on = [ 
+    google_compute_subnetwork.pc_subnet,
+    google_compute_region_health_check.petclinic_health_check,
+    google_compute_region_instance_group_manager.pc_mig
+    ]
+}
+
+
+### Import database module
+module "database" {
+  gcp_project_id        = var.GCP_PROJECT_ID
+  gcp_service_account   = var.GCP_SERVICE_ACCOUNT
+  source                = "./database"
+  vm_type               = var.SQL_VM_TYPE
+  sql_zone              = var.SQL_ZONE
+  sql_srv               = var.SQL_SRV
+  sql_template_link     = var.SQL_IMAGE_LINK
+  sql_subnet            = google_compute_subnetwork.sql_subnet.self_link
+  sql_firewall          = var.SQL_FIREWALL
+}

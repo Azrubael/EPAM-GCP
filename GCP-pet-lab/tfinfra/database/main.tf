@@ -1,18 +1,9 @@
-variable "vm_type" {}
-variable "gcp_service_account" {}
-variable "gcp_project_id" {}
-variable "gcp_zone" {}
-variable "sql_srv" {}
-variable "sql_template_link" {}
-variable "sql_subnet" {}
-variable "sql_firewall" {}
-
-
+### Create MySQL server
 resource "google_compute_instance" "sql_srv" {
+  project      = var.gcp_project_id
   name         = var.sql_srv
   machine_type = var.vm_type
-  project      = var.gcp_project_id
-  zone         = var.gcp_zone
+  zone         = var.sql_zone
 
   boot_disk {
     initialize_params {

@@ -3,3 +3,4 @@ provider "google" {
   region  = "my_region"
   zone    = "my_zone"
 }
+

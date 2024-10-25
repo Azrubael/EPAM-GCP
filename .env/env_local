@@ -1,5 +1,0 @@
-CLOUDSDK_CORE_PROJECT="example"
-REGION="us-central1"
-ZONE="us-central1-c"
-KEY_FILE="/home/vagrant/.env/az-537298-GCP.json"
-ACCOUNT="example"

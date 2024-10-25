@@ -1,0 +1,90 @@
+{
+  "creationTimestamp": "2024-10-20T03:08:07.850-07:00",
+  "description": "",
+  "id": "3893905443448776808",
+  "kind": "compute#instanceTemplate",
+  "name": "petclinic-template",
+  "properties": {
+    "scheduling": {
+      "onHostMaintenance": "MIGRATE",
+      "provisioningModel": "STANDARD",
+      "automaticRestart": true,
+      "preemptible": false
+    },
+    "tags": {
+      "items": [
+        "http-server",
+        "petclinic-firewall",
+        "petclinic-server",
+        "lb-health-check"
+      ]
+    },
+    "disks": [
+      {
+        "type": "PERSISTENT",
+        "deviceName": "petclinic-server-disk",
+        "autoDelete": true,
+        "index": 0,
+        "boot": true,
+        "kind": "compute#attachedDisk",
+        "mode": "READ_WRITE",
+        "initializeParams": {
+          "sourceImage": "https://compute.googleapis.com/compute/beta/projects/az-537298/global/images/petclinic-image",
+          "diskType": "pd-balanced",
+          "diskSizeGb": "10"
+        }
+      }
+    ],
+    "networkInterfaces": [
+      {
+        "stackType": "IPV4_ONLY",
+        "name": "nic0",
+        "network": "https://www.googleapis.com/compute/beta/projects/az-537298/global/networks/petclinic-vpc",
+        "accessConfigs": [
+          {
+            "name": "external-nat",
+            "type": "ONE_TO_ONE_NAT",
+            "kind": "compute#accessConfig",
+            "networkTier": "PREMIUM"
+          }
+        ],
+        "subnetwork": "https://www.googleapis.com/compute/beta/projects/az-537298/regions/us-central1/subnetworks/pc-subnet",
+        "kind": "compute#networkInterface"
+      }
+    ],
+    "reservationAffinity": {
+      "consumeReservationType": "ANY_RESERVATION"
+    },
+    "canIpForward": false,
+    "machineType": "g1-small",
+    "metadata": {
+      "fingerprint": "aGbriGBxydU=",
+      "kind": "compute#metadata"
+    },
+    "shieldedVmConfig": {
+      "enableSecureBoot": false,
+      "enableVtpm": true,
+      "enableIntegrityMonitoring": true
+    },
+    "shieldedInstanceConfig": {
+      "enableSecureBoot": false,
+      "enableVtpm": true,
+      "enableIntegrityMonitoring": true
+    },
+    "serviceAccounts": [
+      {
+        "email": "azrubael@az-537298.iam.gserviceaccount.com",
+        "scopes": [
+          "https://www.googleapis.com/auth/devstorage.read_only",
+          "https://www.googleapis.com/auth/logging.write",
+          "https://www.googleapis.com/auth/monitoring.write",
+          "https://www.googleapis.com/auth/service.management.readonly",
+          "https://www.googleapis.com/auth/servicecontrol",
+          "https://www.googleapis.com/auth/trace.append"
+        ]
+      }
+    ]
+  },
+  "region": "https://www.googleapis.com/compute/beta/projects/az-537298/regions/us-central1",
+  "selfLink": "projects/az-537298/regions/us-central1/instanceTemplates/petclinic-template"
+}

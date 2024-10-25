@@ -1,0 +1,62 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  ### ------- Define the VM for the MySQL server
+  config.vm.define "mysql" do |mysql|
+    mysql.vm.box = "ubuntu/focal64"     # Ubuntu 20.04
+    mysql.vm.network "private_network", type: "dhcp"
+    mysql.vm.hostname = "mysqlserver"
+    mysql.vm.synced_folder ".", "/vagrant", disabled: false
+
+    mysql.vm.provider "virtualbox" do |ubuntu20|
+      ubuntu20.name = "mysqlserver"
+      ubuntu20.memory = "1200"
+      ubuntu20.cpus = 1
+      ubuntu20.customize ["modifyvm", :id, "--vram", "16"]
+    end
+
+    mysql.vm.provision "file", source: "./scripts/mysqlserver.env", destination: "/home/vagrant/mysqlserver.env"
+    mysql.vm.provision "shell", path: "./scripts/mysqlserver-provision.sh"
+
+  end
+
+
+  ### ------ Define the VM for the Pet Clinic application
+  config.vm.define "pc" do |pc|
+    pc.vm.box = "ubuntu/focal64"    # Ubuntu 20.04
+    pc.vm.network "private_network", type: "dhcp"
+    pc.vm.hostname = "petclinic"
+    pc.vm.synced_folder ".", "/vagrant", disabled: false
+
+    pc.vm.provider "virtualbox" do |ubuntu20|
+      ubuntu20.name = "petclinic"
+      ubuntu20.memory = "1200"
+      ubuntu20.cpus = 1
+      ubuntu20.customize ["modifyvm", :id, "--vram", "16"]
+    end
+
+    files_to_provision = [
+      { source: "./app/spring-petclinic.jar",
+        destination: "/home/vagrant/spring-petclinic.jar" },
+      { source: "./app/__cacert_entrypoint.sh",
+        destination: "/home/vagrant/__cacert_entrypoint.sh" },
+      { source: "./app/start_app.sh",
+        destination: "/home/vagrant/start_app.sh" },
+      { source: "./app/petclinic.service",
+        destination: "/home/vagrant/petclinic.service" },
+      { source: "./scripts/petclinic.env",
+        destination: "/home/vagrant/petclinic.env" }
+    ]
+
+    files_to_provision.each do |file|
+      pc.vm.provision "file", source: file[:source], destination: file[:destination]
+    end
+
+    pc.vm.provision "shell", path: "./scripts/petclinic-provision.sh"
+
+  end
+
+
+end

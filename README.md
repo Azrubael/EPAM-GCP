@@ -1,5 +1,6 @@
 This repository contains reference materials created after completing educational projects in the Google Cloud environment.
 
+```bash
 $ git branch
 * main              # The current branch
   hashicorp-labs    # The official HashiCorp tutorial lab
@@ -9,3 +10,4 @@ $ git branch
   lab4-skillboost   # GCP Lab4 - Creating a Remote Backend
   task-mig          # The task of EPAM with a managed instances group
   task-iac          # The task of EPAM with IaC in Terraform (petclinic)
+```
